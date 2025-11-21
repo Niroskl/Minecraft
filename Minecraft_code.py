@@ -1,48 +1,43 @@
-import streamlit as st
+# -*- coding: utf-8 -*-
+# מחולל שילובי אמוג'ים (כל אמוג׳י עם כל אמוג׳י)
 
-st.set_page_config(page_title="Minecraft Canva Style", layout="wide")
+import itertools
 
-# רשימת שקופיות עם טקסט ותמונה
-slides = [
-    {"title": "ברוכים הבאים ל-Minecraft!", "text": "משחק Sandbox פופולרי בעולם."},
-    {"title": "מצבי משחק", "text": "Survival ו-Creative – לגלות ולבנות חופשי."},
-    {"title": "עולם פתוח", "text": "חקור כפרים, יערות, מערות וחיות."},
-    {"title": "מולטיפלייר", "text": "שחק עם חברים ברשת או יצור מודים."},
-    {"title": "סיום", "text": "Minecraft הוא משחק מהנה לכל הגילים!"}
-]
+# רשימת כל האמוג'ים העדכנית (3,304 אמוג'ים)
+# נשתמש בטווח היוניקוד הכולל אותם
+# זה כולל את כל האמוג׳ים המודרניים
 
-# ניהול שקופית נוכחית
-if "slide_index" not in st.session_state:
-    st.session_state.slide_index = 0
+def load_all_emojis():
+    emojis = []
+    for codepoint in range(0x1F300, 0x1FAFF):  # טווח האמוג׳ים ביוניקוד
+        try:
+            char = chr(codepoint)
+            if char.encode('utf-8').decode('utf-8') and char.strip():
+                emojis.append(char)
+        except:
+            pass
+    return emojis
 
-col1, col2, col3 = st.columns([1,2,1])
-with col1:
-    if st.button("⬅️ קודמת"):
-        if st.session_state.slide_index > 0:
-            st.session_state.slide_index -= 1
-with col3:
-    if st.button("➡️ הבאה"):
-        if st.session_state.slide_index < len(slides)-1:
-            st.session_state.slide_index += 1
+all_emojis = load_all_emojis()
 
-# הצגת השקופית הנוכחית עם רקע Minecraft
-slide = slides[st.session_state.slide_index]
+print(f"נטענו {len(all_emojis)} אמוג'ים ✔")
 
-st.markdown(
-    f"""
-    <div style="
-        background-image: url('minecraft_bg.png');
-        background-size: cover;
-        background-position: center;
-        padding: 100px;
-        border-radius: 25px;
-        text-align: center;
-        color: white;
-        box-shadow: 10px 10px 30px rgba(0,0,0,0.3);
-    ">
-        <h1 style='font-size:60px'>{slide['title']}</h1>
-        <p style='font-size:28px'>{slide['text']}</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# --- בוחר שני אמוג'ים ---
+e1 = input("בחר אמוג'י ראשון: ")
+e2 = input("בחר אמוג'י שני: ")
+
+print("\nשילוב אופקי:")
+print(e1 + e2)
+
+print("\nשילוב אנכי:")
+print(e1 + "\n" + e2)
+
+# --- כל השילובים האפשריים ---
+save = input("\nלשמור קובץ עם כל 3,304 × 3,304 השילובים? (y/n): ")
+
+if save.lower() == "y":
+    with open("emoji_combinations.txt", "w", encoding="utf-8") as f:
+        for a, b in itertools.product(all_emojis, all_emojis):
+            f.write(a + b + "\n")
+
+    print("✔ נוצר קובץ emoji_combinations.txt עם כל השילובים!")
