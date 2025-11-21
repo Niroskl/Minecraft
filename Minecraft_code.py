@@ -1,40 +1,76 @@
-import streamlit as st
-import random
+import pygame
+import sys
 
-st.set_page_config(page_title="משחק ללמוד עברית", layout="wide")
-st.title("📝 משחק ללמוד עברית – כיתה ג'")
+# --------- הגדרות בסיסיות ----------
+pygame.init()
 
-# ----------- רשימת מילים עם תמונה ----------
-# במציאות אפשר לשים קבצי תמונה מקומיים או קישורים
-words = [
-    {"word": "תפוח", "image": "https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg"},
-    {"word": "כלב", "image": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg"},
-    {"word": "חתול", "image": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg"},
-    {"word": "בית", "image": "https://upload.wikimedia.org/wikipedia/commons/a/a3/White_house.jpg"},
-    {"word": "ספר", "image": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Bookshelf.jpg"},
-]
+WIDTH, HEIGHT = 640, 480
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("MiniCraft 2D - מזויף 😄")
 
-# ----------- בחירת מילה אקראית ----------
-current = random.choice(words)
+# צבעים
+SKY_BLUE = (135, 206, 235)
+BROWN = (139, 69, 19)
+GREEN = (34, 139, 34)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
-st.subheader("מה המילה שמתאימה לתמונה?")
-st.image(current["image"], width=300)
+clock = pygame.time.Clock()
+FPS = 60
 
-# ----------- אפשרויות תשובה ----------
-options = [current["word"]]
-# מוסיפים שתי אפשרויות נוספות אקראיות
-while len(options) < 3:
-    w = random.choice(words)["word"]
-    if w not in options:
-        options.append(w)
+# --------- הגדרות שחקן ----------
+player_size = 40
+player_x = WIDTH // 2
+player_y = HEIGHT - player_size - 50
+player_speed = 5
 
-random.shuffle(options)
+# --------- בלוקים לסביבה ----------
+block_size = 40
+blocks = []  # רשימת בלוקים (x, y)
+# דוגמה – קרקע ראשונית
+for i in range(0, WIDTH, block_size):
+    blocks.append((i, HEIGHT - block_size))
 
-# ----------- בחירה מהמשתמש ----------
-choice = st.radio("בחר את התשובה הנכונה:", options)
+# --------- פונקציות עזר ----------
+def draw_player(x, y):
+    pygame.draw.rect(screen, BLACK, (x, y, player_size, player_size))
 
-if st.button("בדוק"):
-    if choice == current["word"]:
-        st.success("🎉 נכון! כל הכבוד!")
-    else:
-        st.error(f"❌ לא נכון. המילה הנכונה היא: {current['word']}")
+def draw_blocks():
+    for bx, by in blocks:
+        pygame.draw.rect(screen, BROWN, (bx, by, block_size, block_size))
+
+# --------- לולאת המשחק ----------
+running = True
+while running:
+    clock.tick(FPS)
+    screen.fill(SKY_BLUE)  # רקע שמיים
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        # יצירת בלוק חדש על ידי לחיצה על העכבר
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mx, my = pygame.mouse.get_pos()
+            # מיקום הבלוק לגריד
+            bx = (mx // block_size) * block_size
+            by = (my // block_size) * block_size
+            blocks.append((bx, by))
+
+    # --------- קלט מהמקלדת ----------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player_x -= player_speed
+    if keys[pygame.K_RIGHT]:
+        player_x += player_speed
+    if keys[pygame.K_UP]:
+        player_y -= player_speed
+    if keys[pygame.K_DOWN]:
+        player_y += player_speed
+
+    # --------- ציור ----------
+    draw_blocks()
+    draw_player(player_x, player_y)
+
+    pygame.display.flip()
