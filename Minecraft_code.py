@@ -1,83 +1,66 @@
-import pygame
-import sys
+import streamlit as st
+import random
 
-pygame.init()
+st.set_page_config(page_title="🍳 סופר משחק בישול 500 מתכונים", layout="wide")
+st.title("🍳 סופר משחק בישול – 500 מתכונים")
 
-# ----------- הגדרות מסך ----------
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("🍳 משחק בישול אינטראקטיבי 2D")
+# ----------- יצירת 500 מתכונים לדוגמה ----------
+ingredients_pool = [f"מרכיב {i}" for i in range(1, 401)]  # 400 מרכיבים
+recipes = {}
+for i in range(1, 501):
+    recipes[f"מתכון {i}"] = random.sample(ingredients_pool, k=random.randint(3,7))
 
-# ----------- צבעים ----------
-WHITE = (255, 255, 255)
-TURQUOISE = (64, 224, 208)
-BLACK = (0,0,0)
+# ----------- סטטוס המשחק ----------
+if "bowl" not in st.session_state:
+    st.session_state.bowl = []
+if "score" not in st.session_state:
+    st.session_state.score = 0
 
-# ----------- טקסטים ----------
-font = pygame.font.SysFont(None, 40)
-def draw_text(text, x, y, color=BLACK):
-    img = font.render(text, True, color)
-    screen.blit(img, (x, y))
+# ----------- בחירת מתכון ----------
+selected_recipe = st.selectbox("בחר מתכון לנסות לבשל:", list(recipes.keys()))
+st.subheader(f"מתכון נבחר: {selected_recipe}")
 
-# ----------- מרכיבים על המסך ----------
-ingredients = [
-    {"name": "ביצה", "rect": pygame.Rect(50, 50, 100, 50)},
-    {"name": "קמח", "rect": pygame.Rect(50, 120, 100, 50)},
-    {"name": "חלב", "rect": pygame.Rect(50, 190, 100, 50)},
-]
+# ----------- הצגת המרכיבים עם כפתורים (רק חלק מהם כדי לא לעמוס) ----------
+st.subheader("הוסף מרכיבים לקערה:")
+display_ingredients = random.sample(ingredients_pool, 50)  # מציג רק 50 מרכיבים בכל פעם
+cols = st.columns(5)
+for i, ing in enumerate(display_ingredients):
+    col = cols[i % 5]
+    if col.button(f"➕ {ing}"):
+        st.session_state.bowl.append(ing)
 
-bowl = pygame.Rect(600, 400, 150, 100)
-bowl_contents = []
+# ----------- הצגת תוכן הקערה ----------
+st.subheader("מה יש בקערה עכשיו?")
+st.write(" | ".join(st.session_state.bowl) if st.session_state.bowl else "הקערה ריקה 🥣")
 
-dragging = None
+# ----------- פעולות בישול ----------
+st.subheader("פעולות בישול:")
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("ערבב 🔄"):
+        if st.session_state.bowl:
+            st.success("🔄 ערבבת את המרכיבים!")
+        else:
+            st.warning("הקערה ריקה! הוסף מרכיבים קודם.")
+with col2:
+    if st.button("בשל 🍳"):
+        if not st.session_state.bowl:
+            st.warning("אין מרכיבים בקערה!")
+        else:
+            correct_ingredients = set(recipes[selected_recipe])
+            added_ingredients = set(st.session_state.bowl)
+            if correct_ingredients == added_ingredients:
+                st.success(f"🎉 הצלחת לבשל {selected_recipe}! 🏆")
+                st.session_state.score += 1
+            else:
+                st.error(f"❌ המרכיבים אינם נכונים. המתכון הנכון: {', '.join(correct_ingredients)}")
+            st.session_state.bowl.clear()
 
-# ----------- לולאת המשחק ----------
-running = True
-while running:
-    screen.fill(TURQUOISE)
+# ----------- ניקוד ותמיכה באמוג'ים ----------
+st.subheader(f"ניקוד: {st.session_state.score} ⭐")
+st.info("נסה לשלב את המרכיבים הנכונים לפי המתכון ובשל! 🌟")
 
-    # ציור הקערה
-    pygame.draw.ellipse(screen, WHITE, bowl)
-    draw_text("קערה", bowl.x+30, bowl.y+35)
-
-    # ציור המרכיבים
-    for ing in ingredients:
-        pygame.draw.rect(screen, WHITE, ing["rect"])
-        draw_text(ing["name"], ing["rect"].x+10, ing["rect"].y+10)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        # התחלת גרירה
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            for ing in ingredients:
-                if ing["rect"].collidepoint(event.pos):
-                    dragging = ing
-                    mouse_x, mouse_y = event.pos
-                    offset_x = ing["rect"].x - mouse_x
-                    offset_y = ing["rect"].y - mouse_y
-
-        # גרירה בפועל
-        elif event.type == pygame.MOUSEMOTION:
-            if dragging:
-                mouse_x, mouse_y = event.pos
-                dragging["rect"].x = mouse_x + offset_x
-                dragging["rect"].y = mouse_y + offset_y
-
-        # שחרור גרירה
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if dragging:
-                if bowl.colliderect(dragging["rect"]):
-                    bowl_contents.append(dragging["name"])
-                    # החזרת המרכיב למקומו המקורי
-                    dragging["rect"].x, dragging["rect"].y = 50, 50 + ingredients.index(dragging)*70
-                dragging = None
-
-    # הצגת תוכן הקערה
-    draw_text("תוכן הקערה: " + ", ".join(bowl_contents), 300, 500)
-
-    pygame.display.flip()
-
-pygame.quit()
-sys.exit()
+# ----------- כפתור לאיפוס הקערה ----------
+if st.button("♻️ אפס קערה"):
+    st.session_state.bowl.clear()
+    st.success("הקערה ריקה עכשיו! 🥣")
