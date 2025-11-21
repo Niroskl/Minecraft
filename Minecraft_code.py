@@ -1,41 +1,57 @@
 import streamlit as st
 
-st.set_page_config(page_title="Minecraft Presentation", layout="wide")
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #40E0D0;  /* רקע טורקיז */
-        color: white;
-        font-family: 'Courier New', monospace;
-    }
-    .slide-box {
-        background-color: #006666;
-        padding: 30px;
-        border-radius: 15px;
-        text-align: center;
-        margin: 20px;
-    }
-    .slide-img {
-        max-width: 80%;
-        height: auto;
-        margin-top: 15px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.set_page_config(page_title="Minecraft Canva Style", layout="wide")
 
-st.title("🎮 מצגת Minecraft")
+# CSS לעיצוב שקופיות
+st.markdown("""
+<style>
+body {
+    background-color: #40E0D0; /* טורקיז */
+    font-family: 'Courier New', monospace;
+    color: white;
+}
+.slide {
+    background-color: #006666;
+    border-radius: 25px;
+    padding: 50px;
+    text-align: center;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.3);
+}
+.slide h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+.slide p {
+    font-size: 28px;
+}
+.slide img {
+    max-width: 60%;
+    margin-top: 20px;
+    border-radius: 15px;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.5);
+}
+button {
+    background-color: #004d4d;
+    color: white;
+    padding: 15px 25px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# רשימת שקופיות עם טקסט ותמונה (תמונות צריך להוריד או קישור URL)
+st.title("🎮 מצגת Minecraft בסגנון Canva")
+
+# רשימת שקופיות עם טקסט ותמונה
 slides = [
-    {"text": "ברוכים הבאים למצגת על Minecraft!", "img": None},
-    {"text": "Minecraft הוא משחק Sandbox פופולרי", "img": None},
-    {"text": "ניתן לשחק במצב Survival או Creative", "img": None},
-    {"text": "יש חיות, מפלצות, כפרים ומאגרי משאבים", "img": None},
-    {"text": "Minecraft הוא אחד המשחקים הנמכרים ביותר בעולם", "img": None},
-    {"text": "סיום: תודה על הצפייה במצגת Minecraft!", "img": None},
+    {"title": "ברוכים הבאים ל-Minecraft!", "text": "משחק Sandbox פופולרי בעולם.", "img": None},
+    {"title": "מצבי משחק", "text": "Survival ו-Creative – לגלות ולבנות חופשי.", "img": None},
+    {"title": "עולם פתוח", "text": "חקור כפרים, יערות, מערות וחיות.", "img": None},
+    {"title": "מולטיפלייר", "text": "שחק עם חברים ברשת או יצור מודים.", "img": None},
+    {"title": "סיום", "text": "Minecraft הוא משחק מהנה לכל הגילים!", "img": None}
 ]
 
 # ניהול שקופית נוכחית
@@ -52,10 +68,8 @@ with col3:
         if st.session_state.slide_index < len(slides)-1:
             st.session_state.slide_index += 1
 
-# הצגת השקופית
+# הצגת השקופית הנוכחית
 slide = slides[st.session_state.slide_index]
-st.markdown(f"<div class='slide-box'><h2>{slide['text']}</h2></div>", unsafe_allow_html=True)
-
-# אם יש תמונה לשקופית
+st.markdown(f"<div class='slide'><h1>{slide['title']}</h1><p>{slide['text']}</p></div>", unsafe_allow_html=True)
 if slide["img"]:
-    st.image(slide["img"], use_column_width=True, caption="")
+    st.image(slide["img"])
