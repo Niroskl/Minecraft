@@ -1,57 +1,46 @@
 import streamlit as st
 
-st.set_page_config(page_title="MiniCraft 2D Streamlit", layout="wide")
-st.title("🟫 MiniCraft 2D - מזויף")
+st.set_page_config(page_title="מטבח אינטראקטיבי", layout="wide")
+st.title("🍳 בישול אינטראקטיבי במחשב")
 
-# ----------- הגדרות סביבה ----------
-GRID_WIDTH = 10
-GRID_HEIGHT = 10
-CELL_SIZE = 50  # פיקסלים, רק לציור
+# ----------- מרכיבים ----------
+ingredients = ["ביצה", "חלב", "קמח", "גזר", "תפוח"]
+if "bowl" not in st.session_state:
+    st.session_state.bowl = []
 
-# שמירת מצב המשחק
-if "player_pos" not in st.session_state:
-    st.session_state.player_pos = [0, GRID_HEIGHT-1]  # התחלה בתחתית השמאלית
-if "blocks" not in st.session_state:
-    st.session_state.blocks = []
+st.subheader("בחר מרכיבים והוסף לקערה:")
 
-player_x, player_y = st.session_state.player_pos
+cols = st.columns(len(ingredients))
+for i, ing in enumerate(ingredients):
+    with cols[i]:
+        if st.button(f"➕ {ing}"):
+            st.session_state.bowl.append(ing)
 
-# ----------- פונקציות עזר ----------
-def draw_grid():
-    for y in range(GRID_HEIGHT):
-        cols = []
-        for x in range(GRID_WIDTH):
-            if [x, y] == st.session_state.player_pos:
-                cols.append("🧍")  # השחקן
-            elif [x, y] in st.session_state.blocks:
-                cols.append("🟫")  # בלוק
-            else:
-                cols.append("🟦")  # שמיים/רקע
-        st.write("".join(cols))
+st.subheader("מה בקערה עכשיו?")
+st.write(" | ".join(st.session_state.bowl) if st.session_state.bowl else "הקערה ריקה 🥣")
 
-# ----------- כפתורי ניווט ----------
-st.subheader("זוז עם הכפתורים או הוסף בלוק")
+# ----------- פעולות ----------
+st.subheader("בצע פעולה:")
 col1, col2, col3 = st.columns(3)
 with col1:
-    if st.button("⬅️"):
-        if st.session_state.player_pos[0] > 0:
-            st.session_state.player_pos[0] -= 1
+    if st.button("ערבב"):
+        if st.session_state.bowl:
+            st.success("🔄 ערבבת את המרכיבים!")
+        else:
+            st.warning("הקערה ריקה! הוסף מרכיבים קודם.")
 with col2:
-    if st.button("⬆️"):
-        if st.session_state.player_pos[1] > 0:
-            st.session_state.player_pos[1] -= 1
+    if st.button("טגן"):
+        if st.session_state.bowl:
+            st.success("🍳 טיגנת את מה שיש בקערה!")
+            st.session_state.bowl.clear()
+        else:
+            st.warning("אין מה לטגן!")
 with col3:
-    if st.button("➡️"):
-        if st.session_state.player_pos[0] < GRID_WIDTH-1:
-            st.session_state.player_pos[0] += 1
-if st.button("⬇️"):
-    if st.session_state.player_pos[1] < GRID_HEIGHT-1:
-        st.session_state.player_pos[1] += 1
+    if st.button("אפה"):
+        if st.session_state.bowl:
+            st.success("🍰 אפית את מה שיש בקערה!")
+            st.session_state.bowl.clear()
+        else:
+            st.warning("אין מה לאפות!")
 
-# כפתור להוספת בלוק במקום השחקן
-if st.button("🟫 הוסף בלוק כאן"):
-    if st.session_state.player_pos not in st.session_state.blocks:
-        st.session_state.blocks.append(st.session_state.player_pos.copy())
-
-# ----------- ציור הרשת ----------
-draw_grid()
+st.info("הוסף מרכיבים, ערבב, וטגן או אפה. נסה ליצור משהו טעים! 😋")
