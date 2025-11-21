@@ -1,76 +1,57 @@
-import pygame
-import sys
+import streamlit as st
 
-# --------- הגדרות בסיסיות ----------
-pygame.init()
+st.set_page_config(page_title="MiniCraft 2D Streamlit", layout="wide")
+st.title("🟫 MiniCraft 2D - מזויף")
 
-WIDTH, HEIGHT = 640, 480
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("MiniCraft 2D - מזויף 😄")
+# ----------- הגדרות סביבה ----------
+GRID_WIDTH = 10
+GRID_HEIGHT = 10
+CELL_SIZE = 50  # פיקסלים, רק לציור
 
-# צבעים
-SKY_BLUE = (135, 206, 235)
-BROWN = (139, 69, 19)
-GREEN = (34, 139, 34)
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+# שמירת מצב המשחק
+if "player_pos" not in st.session_state:
+    st.session_state.player_pos = [0, GRID_HEIGHT-1]  # התחלה בתחתית השמאלית
+if "blocks" not in st.session_state:
+    st.session_state.blocks = []
 
-clock = pygame.time.Clock()
-FPS = 60
+player_x, player_y = st.session_state.player_pos
 
-# --------- הגדרות שחקן ----------
-player_size = 40
-player_x = WIDTH // 2
-player_y = HEIGHT - player_size - 50
-player_speed = 5
+# ----------- פונקציות עזר ----------
+def draw_grid():
+    for y in range(GRID_HEIGHT):
+        cols = []
+        for x in range(GRID_WIDTH):
+            if [x, y] == st.session_state.player_pos:
+                cols.append("🧍")  # השחקן
+            elif [x, y] in st.session_state.blocks:
+                cols.append("🟫")  # בלוק
+            else:
+                cols.append("🟦")  # שמיים/רקע
+        st.write("".join(cols))
 
-# --------- בלוקים לסביבה ----------
-block_size = 40
-blocks = []  # רשימת בלוקים (x, y)
-# דוגמה – קרקע ראשונית
-for i in range(0, WIDTH, block_size):
-    blocks.append((i, HEIGHT - block_size))
+# ----------- כפתורי ניווט ----------
+st.subheader("זוז עם הכפתורים או הוסף בלוק")
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("⬅️"):
+        if st.session_state.player_pos[0] > 0:
+            st.session_state.player_pos[0] -= 1
+with col2:
+    if st.button("⬆️"):
+        if st.session_state.player_pos[1] > 0:
+            st.session_state.player_pos[1] -= 1
+with col3:
+    if st.button("➡️"):
+        if st.session_state.player_pos[0] < GRID_WIDTH-1:
+            st.session_state.player_pos[0] += 1
+if st.button("⬇️"):
+    if st.session_state.player_pos[1] < GRID_HEIGHT-1:
+        st.session_state.player_pos[1] += 1
 
-# --------- פונקציות עזר ----------
-def draw_player(x, y):
-    pygame.draw.rect(screen, BLACK, (x, y, player_size, player_size))
+# כפתור להוספת בלוק במקום השחקן
+if st.button("🟫 הוסף בלוק כאן"):
+    if st.session_state.player_pos not in st.session_state.blocks:
+        st.session_state.blocks.append(st.session_state.player_pos.copy())
 
-def draw_blocks():
-    for bx, by in blocks:
-        pygame.draw.rect(screen, BROWN, (bx, by, block_size, block_size))
-
-# --------- לולאת המשחק ----------
-running = True
-while running:
-    clock.tick(FPS)
-    screen.fill(SKY_BLUE)  # רקע שמיים
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-        # יצירת בלוק חדש על ידי לחיצה על העכבר
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mx, my = pygame.mouse.get_pos()
-            # מיקום הבלוק לגריד
-            bx = (mx // block_size) * block_size
-            by = (my // block_size) * block_size
-            blocks.append((bx, by))
-
-    # --------- קלט מהמקלדת ----------
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        player_x -= player_speed
-    if keys[pygame.K_RIGHT]:
-        player_x += player_speed
-    if keys[pygame.K_UP]:
-        player_y -= player_speed
-    if keys[pygame.K_DOWN]:
-        player_y += player_speed
-
-    # --------- ציור ----------
-    draw_blocks()
-    draw_player(player_x, player_y)
-
-    pygame.display.flip()
+# ----------- ציור הרשת ----------
+draw_grid()
