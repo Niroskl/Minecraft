@@ -1,66 +1,53 @@
 import streamlit as st
 import random
 
-st.set_page_config(page_title="🍳 סופר משחק בישול 500 מתכונים", layout="wide")
-st.title("🍳 סופר משחק בישול – 500 מתכונים")
+st.set_page_config(page_title="🦄 תינוק חד קרן", layout="wide")
+st.title("🦄 משחק אינטראקטיבי – לטפל בתינוק חד קרן")
 
-# ----------- יצירת 500 מתכונים לדוגמה ----------
-ingredients_pool = [f"מרכיב {i}" for i in range(1, 401)]  # 400 מרכיבים
-recipes = {}
-for i in range(1, 501):
-    recipes[f"מתכון {i}"] = random.sample(ingredients_pool, k=random.randint(3,7))
+# ----------- רקע צבעוני ----------
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #a0e7e5;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
 
-# ----------- סטטוס המשחק ----------
-if "bowl" not in st.session_state:
-    st.session_state.bowl = []
-if "score" not in st.session_state:
-    st.session_state.score = 0
+# ----------- סטטוס ----------
+if "happiness" not in st.session_state:
+    st.session_state.happiness = 0
 
-# ----------- בחירת מתכון ----------
-selected_recipe = st.selectbox("בחר מתכון לנסות לבשל:", list(recipes.keys()))
-st.subheader(f"מתכון נבחר: {selected_recipe}")
+# ----------- תמונה של תינוק חד קרן ----------
+st.image("https://i.imgur.com/7cO1K1j.png", width=300)  # תמונה לדוגמה
 
-# ----------- הצגת המרכיבים עם כפתורים (רק חלק מהם כדי לא לעמוס) ----------
-st.subheader("הוסף מרכיבים לקערה:")
-display_ingredients = random.sample(ingredients_pool, 50)  # מציג רק 50 מרכיבים בכל פעם
-cols = st.columns(5)
-for i, ing in enumerate(display_ingredients):
-    col = cols[i % 5]
-    if col.button(f"➕ {ing}"):
-        st.session_state.bowl.append(ing)
+# ----------- פעולות אינטראקטיביות ----------
+st.subheader("מה תרצה לעשות עם התינוק חד קרן?")
+col1, col2, col3 = st.columns(3)
 
-# ----------- הצגת תוכן הקערה ----------
-st.subheader("מה יש בקערה עכשיו?")
-st.write(" | ".join(st.session_state.bowl) if st.session_state.bowl else "הקערה ריקה 🥣")
-
-# ----------- פעולות בישול ----------
-st.subheader("פעולות בישול:")
-col1, col2 = st.columns(2)
 with col1:
-    if st.button("ערבב 🔄"):
-        if st.session_state.bowl:
-            st.success("🔄 ערבבת את המרכיבים!")
-        else:
-            st.warning("הקערה ריקה! הוסף מרכיבים קודם.")
+    if st.button("להאכיל 🍎"):
+        st.session_state.happiness += random.randint(1, 3)
+        st.success(f"התינוק חד קרן אוכל בשמחה! 🦄❤️ נחתך: {st.session_state.happiness}")
+
 with col2:
-    if st.button("בשל 🍳"):
-        if not st.session_state.bowl:
-            st.warning("אין מרכיבים בקערה!")
-        else:
-            correct_ingredients = set(recipes[selected_recipe])
-            added_ingredients = set(st.session_state.bowl)
-            if correct_ingredients == added_ingredients:
-                st.success(f"🎉 הצלחת לבשל {selected_recipe}! 🏆")
-                st.session_state.score += 1
-            else:
-                st.error(f"❌ המרכיבים אינם נכונים. המתכון הנכון: {', '.join(correct_ingredients)}")
-            st.session_state.bowl.clear()
+    if st.button("לשחק 🎾"):
+        st.session_state.happiness += random.randint(2, 4)
+        st.info(f"התינוק חד קרן צוחק מהמשחק! 🦄✨ נחתך: {st.session_state.happiness}")
 
-# ----------- ניקוד ותמיכה באמוג'ים ----------
-st.subheader(f"ניקוד: {st.session_state.score} ⭐")
-st.info("נסה לשלב את המרכיבים הנכונים לפי המתכון ובשל! 🌟")
+with col3:
+    if st.button("ללטף 🤗"):
+        st.session_state.happiness += random.randint(1, 2)
+        st.warning(f"התינוק חד קרן נהנה מהחיבוק! 🦄💖 נחתך: {st.session_state.happiness}")
 
-# ----------- כפתור לאיפוס הקערה ----------
-if st.button("♻️ אפס קערה"):
-    st.session_state.bowl.clear()
-    st.success("הקערה ריקה עכשיו! 🥣")
+# ----------- מצב שמחה ----------
+st.subheader(f"שמחת התינוק חד קרן: {st.session_state.happiness} ⭐")
+if st.session_state.happiness >= 10:
+    st.balloons()
+    st.success("🎉 התינוק חד קרן מאושר מאוד! אתה אלוף בטיפול! 🦄🌈")
+
+# ----------- כפתור לאיפוס ----------
+if st.button("♻️ לאתחל משחק"):
+    st.session_state.happiness = 0
+    st.success("המשחק התחיל מחדש! 🦄")
