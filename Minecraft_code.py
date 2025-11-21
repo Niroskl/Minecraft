@@ -1,53 +1,40 @@
 import streamlit as st
-import unicodedata
+import random
 
-st.set_page_config(page_title="שילוב כל האמוג'ים", layout="wide")
-st.title("🌈 כל האמוג’ים – בחר ושילב!")
+st.set_page_config(page_title="משחק ללמוד עברית", layout="wide")
+st.title("📝 משחק ללמוד עברית – כיתה ג'")
 
-# ----------- יצירת רשימת כל האמוג'ים (~3,304+) -------------
-def generate_all_emojis():
-    ranges = [
-        (0x1F300, 0x1F5FF),  # סמלים מודרניים
-        (0x1F600, 0x1F64F),  # סמיילים והבעות
-        (0x1F680, 0x1F6FF),  # תחבורה ומקומות
-        (0x2600, 0x26FF),    # סמלים כלליים
-        (0x2700, 0x27BF),    # סמלים נוספים
-        (0x1F1E6, 0x1F1FF),  # דגלים
-        (0x1F900, 0x1F9FF),  # אנשים, גוף, חיות מודרניות
-    ]
-    emojis = []
-    for start, end in ranges:
-        for code in range(start, end + 1):
-            try:
-                char = chr(code)
-                unicodedata.name(char)  # בדיקה אם חוקי
-                emojis.append(char)
-            except:
-                continue
-    # הסרת כפולים ומיון
-    emojis = list(set(emojis))
-    emojis.sort()
-    return emojis
+# ----------- רשימת מילים עם תמונה ----------
+# במציאות אפשר לשים קבצי תמונה מקומיים או קישורים
+words = [
+    {"word": "תפוח", "image": "https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg"},
+    {"word": "כלב", "image": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg"},
+    {"word": "חתול", "image": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg"},
+    {"word": "בית", "image": "https://upload.wikimedia.org/wikipedia/commons/a/a3/White_house.jpg"},
+    {"word": "ספר", "image": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Bookshelf.jpg"},
+]
 
-if "all_emojis" not in st.session_state:
-    st.session_state.all_emojis = generate_all_emojis()
+# ----------- בחירת מילה אקראית ----------
+current = random.choice(words)
 
-all_emojis = st.session_state.all_emojis
-st.success(f"נטענו {len(all_emojis)} אמוג'ים מכל הסוגים! 🎉")
+st.subheader("מה המילה שמתאימה לתמונה?")
+st.image(current["image"], width=300)
 
-# ----------- בחירת מספר אמוג'ים -------------
-st.subheader("בחר עד 5 אמוג'ים לשילוב")
-num = st.slider("כמה אמוג'ים?", 1, 5, 2)
+# ----------- אפשרויות תשובה ----------
+options = [current["word"]]
+# מוסיפים שתי אפשרויות נוספות אקראיות
+while len(options) < 3:
+    w = random.choice(words)["word"]
+    if w not in options:
+        options.append(w)
 
-selected = []
-for i in range(num):
-    s = st.selectbox(f"אמוג'י {i+1}", all_emojis, index=i)
-    selected.append(s)
+random.shuffle(options)
 
-# ----------- הצגת השילוב -------------
-st.subheader("השילוב שלך")
-combined = "".join(selected)
+# ----------- בחירה מהמשתמש ----------
+choice = st.radio("בחר את התשובה הנכונה:", options)
 
-st.markdown(f"**אופקי:** {combined}")
-st.markdown(f"**אנכי:** {combined.replace('', '\n')[1:-1]}")
-st.markdown(f"<div style='font-size:80px'>{combined}</div>", unsafe_allow_html=True)
+if st.button("בדוק"):
+    if choice == current["word"]:
+        st.success("🎉 נכון! כל הכבוד!")
+    else:
+        st.error(f"❌ לא נכון. המילה הנכונה היא: {current['word']}")
