@@ -1,44 +1,22 @@
 import streamlit as st
-import unicodedata
+import emoji
 
-st.set_page_config(page_title="כל האמוג'ים והסמלים", layout="wide")
-st.title("🎨 בחר אמוג'י או סמל מכל היוניקוד")
+st.set_page_config(page_title="כל האמוג'ים הקיימים", layout="wide")
+st.title("🌈 כל האמוג׳ים הקיימים – בחר ושילב!")
 
-# ----------- טוען את כל האמוג'ים והסמלים -------------
-def load_all_emojis_and_symbols():
-    emojis = []
-    ranges = [
-        (0x1F300, 0x1FAFF),  # אמוג'ים מודרניים
-        (0x2600, 0x26FF),    # סמלים כלליים
-        (0x2700, 0x27BF),    # סמלים נוספים
-        (0x1F1E6, 0x1F1FF),  # דגלים
-    ]
-    for start, end in ranges:
-        for code in range(start, end + 1):
-            try:
-                char = chr(code)
-                # אם יש שם רשמי ביוניקוד, זה תקין
-                unicodedata.name(char)
-                emojis.append(char)
-            except:
-                continue
-    emojis = list(set(emojis))
-    emojis.sort()
-    return emojis
+# ----------- טוען את כל האמוג'ים הידועים -------------
+all_emojis = list(emoji.EMOJI_DATA.keys())
+all_emojis.sort()
 
-if "all_symbols" not in st.session_state:
-    st.session_state.all_symbols = load_all_emojis_and_symbols()
+st.success(f"נטענו {len(all_emojis)} אמוג'ים מכל הסוגים! 🎉")
 
-all_symbols = st.session_state.all_symbols
-st.success(f"נטענו {len(all_symbols)} אמוג'ים וסמלים! 🎉")
-
-# ----------- בחירת אמוג'ים/סמלים -------------
-st.subheader("בחר עד 5 אמוג'ים/סמלים")
+# ----------- בחירת אמוג'ים -------------
+st.subheader("בחר עד 5 אמוג'ים לשילוב")
 num = st.slider("כמה לבחור?", 1, 5, 2)
 
 selected = []
 for i in range(num):
-    s = st.selectbox(f"סמל/אמוג'י {i+1}", all_symbols, index=i)
+    s = st.selectbox(f"אמוג'י {i+1}", all_emojis, index=i)
     selected.append(s)
 
 # ----------- הצגת השילוב -------------
