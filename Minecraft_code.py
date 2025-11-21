@@ -1,43 +1,45 @@
-# -*- coding: utf-8 -*-
-# מחולל שילובי אמוג'ים (כל אמוג׳י עם כל אמוג׳י)
+import streamlit as st
+import unicodedata
 
-import itertools
+st.set_page_config(page_title="שילוב אמוג'ים", layout="wide")
+st.title("😀 שילוב שני אמוג'ים מכל האמוג'ים הקיימים")
 
-# רשימת כל האמוג'ים העדכנית (3,304 אמוג'ים)
-# נשתמש בטווח היוניקוד הכולל אותם
-# זה כולל את כל האמוג׳ים המודרניים
-
+# ----------- טוען את כל האמוג'ים -------------
 def load_all_emojis():
     emojis = []
-    for codepoint in range(0x1F300, 0x1FAFF):  # טווח האמוג׳ים ביוניקוד
-        try:
-            char = chr(codepoint)
-            if char.encode('utf-8').decode('utf-8') and char.strip():
+    # טווחי יוניקוד לאמוג'ים
+    ranges = [
+        (0x1F300, 0x1FAFF),  # סמלים ואמוג'ים
+        (0x2600, 0x26FF),    # סמלים
+        (0x2700, 0x27BF),    # סמלים נוספים
+        (0x1F1E6, 0x1F1FF),  # דגלים
+    ]
+    for start, end in ranges:
+        for code in range(start, end + 1):
+            try:
+                char = chr(code)
+                unicodedata.name(char)  # בדיקה אם חוקי
                 emojis.append(char)
-        except:
-            pass
+            except:
+                continue
+    # הסרת כפולים
+    emojis = list(set(emojis))
+    emojis.sort()
     return emojis
 
-all_emojis = load_all_emojis()
+if "all_emojis" not in st.session_state:
+    st.session_state.all_emojis = load_all_emojis()
 
-print(f"נטענו {len(all_emojis)} אמוג'ים ✔")
+all_emojis = st.session_state.all_emojis
+st.success(f"נטענו {len(all_emojis)} אמוג'ים!")
 
-# --- בוחר שני אמוג'ים ---
-e1 = input("בחר אמוג'י ראשון: ")
-e2 = input("בחר אמוג'י שני: ")
+# ----------- בחירת שני אמוג'ים -------------
+st.subheader("בחר שני אמוג'ים לשילוב")
+emoji1 = st.selectbox("אמוג'י ראשון", all_emojis, index=0)
+emoji2 = st.selectbox("אמוג'י שני", all_emojis, index=1)
 
-print("\nשילוב אופקי:")
-print(e1 + e2)
-
-print("\nשילוב אנכי:")
-print(e1 + "\n" + e2)
-
-# --- כל השילובים האפשריים ---
-save = input("\nלשמור קובץ עם כל 3,304 × 3,304 השילובים? (y/n): ")
-
-if save.lower() == "y":
-    with open("emoji_combinations.txt", "w", encoding="utf-8") as f:
-        for a, b in itertools.product(all_emojis, all_emojis):
-            f.write(a + b + "\n")
-
-    print("✔ נוצר קובץ emoji_combinations.txt עם כל השילובים!")
+# ----------- הצגת השילוב -------------
+st.subheader("השילוב שלך")
+st.markdown(f"**אופקי:** {emoji1}{emoji2}")
+st.markdown(f"**אנכי:** {emoji1}\n{emoji2}")
+st.markdown(f"<div style='font-size:80px'>{emoji1}{emoji2}</div>", unsafe_allow_html=True)
