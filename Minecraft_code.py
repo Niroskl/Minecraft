@@ -1,16 +1,15 @@
 import streamlit as st
 import unicodedata
 
-st.set_page_config(page_title="שילוב אמוג'ים", layout="wide")
-st.title("😀 שילוב שני אמוג'ים מכל האמוג'ים הקיימים")
+st.set_page_config(page_title="כל האמוג'ים והסמלים", layout="wide")
+st.title("🎨 בחר אמוג'י או סמל מכל היוניקוד")
 
-# ----------- טוען את כל האמוג'ים -------------
-def load_all_emojis():
+# ----------- טוען את כל האמוג'ים והסמלים -------------
+def load_all_emojis_and_symbols():
     emojis = []
-    # טווחי יוניקוד לאמוג'ים
     ranges = [
-        (0x1F300, 0x1FAFF),  # סמלים ואמוג'ים
-        (0x2600, 0x26FF),    # סמלים
+        (0x1F300, 0x1FAFF),  # אמוג'ים מודרניים
+        (0x2600, 0x26FF),    # סמלים כלליים
         (0x2700, 0x27BF),    # סמלים נוספים
         (0x1F1E6, 0x1F1FF),  # דגלים
     ]
@@ -18,28 +17,32 @@ def load_all_emojis():
         for code in range(start, end + 1):
             try:
                 char = chr(code)
-                unicodedata.name(char)  # בדיקה אם חוקי
+                # אם יש שם רשמי ביוניקוד, זה תקין
+                unicodedata.name(char)
                 emojis.append(char)
             except:
                 continue
-    # הסרת כפולים
     emojis = list(set(emojis))
     emojis.sort()
     return emojis
 
-if "all_emojis" not in st.session_state:
-    st.session_state.all_emojis = load_all_emojis()
+if "all_symbols" not in st.session_state:
+    st.session_state.all_symbols = load_all_emojis_and_symbols()
 
-all_emojis = st.session_state.all_emojis
-st.success(f"נטענו {len(all_emojis)} אמוג'ים!")
+all_symbols = st.session_state.all_symbols
+st.success(f"נטענו {len(all_symbols)} אמוג'ים וסמלים! 🎉")
 
-# ----------- בחירת שני אמוג'ים -------------
-st.subheader("בחר שני אמוג'ים לשילוב")
-emoji1 = st.selectbox("אמוג'י ראשון", all_emojis, index=0)
-emoji2 = st.selectbox("אמוג'י שני", all_emojis, index=1)
+# ----------- בחירת אמוג'ים/סמלים -------------
+st.subheader("בחר עד 5 אמוג'ים/סמלים")
+num = st.slider("כמה לבחור?", 1, 5, 2)
+
+selected = []
+for i in range(num):
+    s = st.selectbox(f"סמל/אמוג'י {i+1}", all_symbols, index=i)
+    selected.append(s)
 
 # ----------- הצגת השילוב -------------
 st.subheader("השילוב שלך")
-st.markdown(f"**אופקי:** {emoji1}{emoji2}")
-st.markdown(f"**אנכי:** {emoji1}\n{emoji2}")
-st.markdown(f"<div style='font-size:80px'>{emoji1}{emoji2}</div>", unsafe_allow_html=True)
+combined = "".join(selected)
+st.markdown(f"**בגודל רגיל:** {combined}")
+st.markdown(f"<div style='font-size:80px'>{combined}</div>", unsafe_allow_html=True)
