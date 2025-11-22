@@ -1,7 +1,10 @@
 import streamlit as st
 
-# הגדרת דף
+# ---------- הגדרות עמוד ----------
 st.set_page_config(page_title="🦄 טיפול בחד־קרן תינוק", page_icon="🦄", layout="centered")
+
+st.title("🦄 טיפול בחד־קרן תינוק")
+st.write("גרור ושחרר כאן תמונה של חד־קרן תינוק (PNG/JPG):")
 
 # ---------- מצב ראשוני ----------
 if "happiness" not in st.session_state:
@@ -11,35 +14,34 @@ if "energy" not in st.session_state:
 if "cleanliness" not in st.session_state:
     st.session_state.cleanliness = 50
 
-st.title("🦄 טיפול בחד־קרן תינוק")
-st.write("גרור ושחרר תמונה של חד־קרן תינוק כאן!")
-
-# ---------- גרור ושחרר תמונה ----------
-uploaded_image = st.file_uploader("גרור ושחרר תמונה כאן (PNG/JPG)", type=["png", "jpg", "jpeg"])
+# ---------- העלאת תמונה ----------
+uploaded_image = st.file_uploader("גרור ושחרר כאן", type=["png", "jpg", "jpeg"])
 
 if uploaded_image:
     st.image(uploaded_image, width=320)
+    st.success("🦄 התמונה נטענה בהצלחה!")
 else:
-    st.info("⬆️ העלה תמונה כדי שהחד־קרן יופיע במשחק!")
+    st.info("⬆️ גרור ושחרר תמונה כדי שהחד־קרן יופיע במשחק")
 
 st.subheader("מצב התינוק:")
 
-# ---------- פסי התקדמות ----------
+# ---------- פונקציה לתיקון ערכים ----------
 def clamp(value):
     return min(max(value, 0), 100)
 
+# ---------- פסי התקדמות ----------
+st.write("**שמחה:**")
 st.progress(clamp(st.session_state.happiness)/100)
-st.write(f"**שמחה:** {clamp(st.session_state.happiness)}/100")
 
+st.write("**אנרגיה:**")
 st.progress(clamp(st.session_state.energy)/100)
-st.write(f"**אנרגיה:** {clamp(st.session_state.energy)}/100")
 
+st.write("**ניקיון:**")
 st.progress(clamp(st.session_state.cleanliness)/100)
-st.write(f"**ניקיון:** {clamp(st.session_state.cleanliness)}/100")
 
 st.divider()
 
-# ---------- פעולות ----------
+# ---------- כפתורי פעולה ----------
 col1, col2, col3 = st.columns(3)
 
 with col1:
