@@ -1,127 +1,73 @@
 import streamlit as st
-import random
 
-st.set_page_config(page_title="🦄 תינוק חד קרן", layout="wide")
+st.set_page_config(page_title="🦄 טיפול בחד־קרן תינוק", page_icon="🦄", layout="centered")
 
-# ----------- רקע מהמם -----------
-st.markdown("""
-<style>
-body {
-    background: linear-gradient(135deg, #a0e7ff, #d6bfff, #ffe4fa);
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.title("🦄👶 תינוק חד־קרן – משחק טיפול מושלם")
-st.subheader("טפלו בתינוק החד־קרן כדי שיהיה שמח ובריא 🌈")
-
-# ----------- הגדרת מצב ראשוני -----------
-
+# --- מצב המשחק --- #
 if "happiness" not in st.session_state:
-    st.session_state.happiness = 5
+    st.session_state.happiness = 50
 if "energy" not in st.session_state:
-    st.session_state.energy = 5
-if "hunger" not in st.session_state:
-    st.session_state.hunger = 5
-if "mood" not in st.session_state:
-    st.session_state.mood = "רגוע"
+    st.session_state.energy = 50
+if "cleanliness" not in st.session_state:
+    st.session_state.cleanliness = 50
 
-# ----------- תמונת תינוק חד קרן -----------
-unicorn_baby_image = "https://i.imgur.com/8oaS4tF.png"
-st.image(unicorn_baby_image, width=300, caption="תינוק חד־קרן חמוד 🦄💖")
+st.title("🦄 טיפול בחד־קרן תינוק")
+st.write("בחר תמונה של חד־קרן תינוק מהמחשב שלך!")
 
+# -------- תמונה -------- #
+uploaded_image = st.file_uploader("העלה תמונה (PNG/JPG)", type=["png", "jpg", "jpeg"])
 
-# ----------- עדכון מצב -----------
+if uploaded_image:
+    st.image(uploaded_image, width=320)
+else:
+    st.info("⬆️ העלה תמונה כדי שהחד־קרן יופיע במשחק!")
 
-def update_status(action):
-    if action == "feed":
-        st.session_state.hunger += 2
-        st.session_state.happiness += 1
-        st.session_state.mood = "שבע ומרוצה 😋"
+st.subheader("מצב התינוק:")
 
-    elif action == "play":
-        st.session_state.happiness += 3
-        st.session_state.energy -= 1
-        st.session_state.mood = "משועשע ושמח 😄"
+# --- פסי התקדמות --- #
+st.progress(st.session_state.happiness / 100, text="שמחה")
+st.progress(st.session_state.energy / 100, text="אנרגיה")
+st.progress(st.session_state.cleanliness / 100, text="ניקיון")
 
-    elif action == "sleep":
-        st.session_state.energy += 3
-        st.session_state.mood = "ישן מתוק 😴"
+st.divider()
 
-    elif action == "hug":
-        st.session_state.happiness += 2
-        st.session_state.mood = "מרגיש אהבה 🤗💖"
-
-    # בטווח 0–10
-    st.session_state.happiness = min(max(st.session_state.happiness, 0), 10)
-    st.session_state.energy = min(max(st.session_state.energy, 0), 10)
-    st.session_state.hunger = min(max(st.session_state.hunger, 0), 10)
-
-
-# ----------- פונקציה לתיקון progress bar -----------
-
-def clamp_progress(value):
-    return min(max(value / 10, 0), 1)
-
-
-# ----------- כפתורי פעולה -----------
-
-col1, col2, col3, col4 = st.columns(4)
+# --- כפתורי פעולות --- #
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("🍎 להאכיל"):
-        update_status("feed")
-        st.success("התינוק אוכל בהנאה!")
+    if st.button("🍏 להאכיל"):
+        st.session_state.happiness += 10
+        st.session_state.energy += 15
+        st.session_state.cleanliness -= 5
 
 with col2:
-    if st.button("🎾 לשחק"):
-        update_status("play")
-        st.info("התינוק מתגלגל מצחוק!")
+    if st.button("🧼 מקלחת"):
+        st.session_state.cleanliness += 20
+        st.session_state.happiness -= 5
 
 with col3:
-    if st.button("😴 לישון"):
-        update_status("sleep")
-        st.warning("התינוק נרדם...")
+    if st.button("🎈 לשחק"):
+        st.session_state.happiness += 15
+        st.session_state.energy -= 10
 
-with col4:
-    if st.button("🤗 חיבוק"):
-        update_status("hug")
-        st.balloons()
-        st.success("איזה חיבוק! התינוק מאושר!")
+if st.button("😴 לישון"):
+    st.session_state.energy += 25
+    st.session_state.happiness += 5
 
+# --- תיקון גבולות --- #
+st.session_state.happiness = min(max(st.session_state.happiness, 0), 100)
+st.session_state.energy = min(max(st.session_state.energy, 0), 100)
+st.session_state.cleanliness = min(max(st.session_state.cleanliness, 0), 100)
 
-# ----------- מצב התינוק -----------
+st.divider()
 
-st.markdown("## 🌡️ מצב התינוק:")
+# --- התראות --- #
+if st.session_state.happiness == 100:
+    st.success("🎉 חד־הקרן מאושר מאוד!")
+elif st.session_state.happiness < 20:
+    st.error("☹️ חד־הקרן עצוב… תעזור לו!")
 
-st.write("**שמחה:**")
-st.progress(clamp_progress(st.session_state.happiness))
+if st.session_state.energy < 20:
+    st.warning("😴 חד־הקרן עייף… כדאי לישון!")
 
-st.write("**אנרגיה:**")
-st.progress(clamp_progress(st.session_state.energy))
-
-st.write("**שובע:**")
-st.progress(clamp_progress(st.session_state.hunger))
-
-st.info(f"**מצב רוח נוכחי:** {st.session_state.mood}")
-
-
-# ----------- ניצחון -----------
-
-if (
-    st.session_state.happiness == 10 and
-    st.session_state.energy >= 8 and
-    st.session_state.hunger >= 8
-):
-    st.success("🌟🦄 התינוק חד־קרן הגיע לאושר מושלם!!!")
-    st.balloons()
-
-
-# ----------- איפוס -----------
-
-if st.button("♻️ התחלה מחדש"):
-    st.session_state.happiness = 5
-    st.session_state.energy = 5
-    st.session_state.hunger = 5
-    st.session_state.mood = "רגוע"
-    st.success("🎉 המשחק התחיל מחדש!")
+if st.session_state.cleanliness < 20:
+    st.warning("🧽 חד־הקרן מלוכלך!")
