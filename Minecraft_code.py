@@ -1,54 +1,113 @@
 import streamlit as st
 import random
+import time
 
 st.set_page_config(page_title="🦄 תינוק חד קרן", layout="wide")
-st.title("🦄 משחק אינטראקטיבי – לטפל בתינוק חד קרן")
 
-# ----------- רקע צבעוני ----------
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #a0e7e5;
-    }
-    </style>
-    """, unsafe_allow_html=True
-)
+# ----------- עיצוב רקע מהמם -----------
+st.markdown("""
+<style>
+body {
+    background: linear-gradient(135deg, #a0e7ff, #d6bfff, #ffe4fa);
+}
+</style>
+""", unsafe_allow_html=True)
 
-# ----------- סטטוס ----------
+st.title("🦄👶 תינוק חד־קרן – משחק טיפול משודרג")
+st.subheader("דאגו לתינוק החד־קרן שיהיה שמח, רגוע ומטופל! 🌈")
+
+# ----------- מצב פנימי -----------
+
 if "happiness" not in st.session_state:
-    st.session_state.happiness = 0
+    st.session_state.happiness = 5
+if "energy" not in st.session_state:
+    st.session_state.energy = 5
+if "hunger" not in st.session_state:
+    st.session_state.hunger = 5
+if "mood" not in st.session_state:
+    st.session_state.mood = "רגוע"
 
-# ----------- תמונה של תינוק חד קרן ----------
-unicorn_image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Unicorn_fantasy.png/320px-Unicorn_fantasy.png"
-st.image(unicorn_image_url, width=300)
+# ----------- תמונת תינוק חד קרן אמיתית -----------
 
-# ----------- פעולות אינטראקטיביות ----------
-st.subheader("מה תרצה לעשות עם התינוק חד קרן?")
-col1, col2, col3 = st.columns(3)
+unicorn_baby_image = "https://i.imgur.com/8oaS4tF.png"  # תינוק חד קרן אמיתי
+
+st.image(unicorn_baby_image, width=300, caption="תינוק חד־קרן חמוד 🦄💖")
+
+# ----------- פונקציה לעדכון מצב -----------
+
+def update_status(action):
+    if action == "feed":
+        st.session_state.hunger += 2
+        st.session_state.happiness += 1
+        st.session_state.mood = "שבע ומרוצה 😋"
+    elif action == "play":
+        st.session_state.happiness += 3
+        st.session_state.energy -= 1
+        st.session_state.mood = "משועשע ושמח 😄"
+    elif action == "sleep":
+        st.session_state.energy += 3
+        st.session_state.mood = "ישן מתוק 😴"
+    elif action == "hug":
+        st.session_state.happiness += 2
+        st.session_state.mood = "מרגיש אהבה 🤗💖"
+
+    # גבולות
+    st.session_state.energy = min(max(st.session_state.energy, 0), 10)
+    st.session_state.hunger = min(max(st.session_state.hunger, 0), 10)
+    st.session_state.happiness = min(max(st.session_state.happiness, 0), 10)
+
+
+# ----------- כפתורים -----------
+
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    if st.button("להאכיל 🍎"):
-        st.session_state.happiness += random.randint(1, 3)
-        st.success(f"התינוק חד קרן אוכל בשמחה! 🦄❤️ נקודות: {st.session_state.happiness}")
+    if st.button("🍎 להאכיל"):
+        update_status("feed")
+        st.success("התינוק חד־קרן אוכל בהנאה!")
 
 with col2:
-    if st.button("לשחק 🎾"):
-        st.session_state.happiness += random.randint(2, 4)
-        st.info(f"התינוק חד קרן צוחק מהמשחק! 🦄✨ נקודות: {st.session_state.happiness}")
+    if st.button("🎾 לשחק"):
+        update_status("play")
+        st.info("התינוק מתגלגל מצחוק!")
 
 with col3:
-    if st.button("ללטף 🤗"):
-        st.session_state.happiness += random.randint(1, 2)
-        st.warning(f"התינוק חד קרן נהנה מהחיבוק! 🦄💖 נקודות: {st.session_state.happiness}")
+    if st.button("😴 להשכיב לישון"):
+        update_status("sleep")
+        st.warning("זזז… התינוק נרדם.")
 
-# ----------- מצב שמחה ----------
-st.subheader(f"שמחת התינוק חד קרן: {st.session_state.happiness} ⭐")
-if st.session_state.happiness >= 10:
+with col4:
+    if st.button("🤗 חיבוק"):
+        update_status("hug")
+        st.balloons()
+        st.success("איזה חיבוק! התינוק מאושר!")
+
+# ----------- תצוגת מצב -----------
+
+st.markdown("### מצב התינוק:")
+
+st.progress(st.session_state.happiness/10)
+st.write(f"**שמחה:** {st.session_state.happiness}/10")
+
+st.progress(st.session_state.energy/10)
+st.write(f"**אנרגיה:** {st.session_state.energy}/10")
+
+st.progress(st.session_state.hunger/10)
+st.write(f"**שובע:** {st.session_state.hunger}/10")
+
+st.info(f"**מצב רוח נוכחי:** {st.session_state.mood}")
+
+# ----------- ניצחון -----------
+
+if st.session_state.happiness == 10 and st.session_state.energy >= 8 and st.session_state.hunger >= 8:
+    st.success("🌈🦄 התינוק חד־קרן הגיע לאושר מושלם!!!")
     st.balloons()
-    st.success("🎉 התינוק חד קרן מאושר מאוד! אתה אלוף בטיפול! 🦄🌈")
 
-# ----------- כפתור לאיפוס ----------
-if st.button("♻️ לאתחל משחק"):
-    st.session_state.happiness = 0
-    st.success("המשחק התחיל מחדש! 🦄")
+# ----------- איפוס -----------
+
+if st.button("♻️ התחלת משחק חדש"):
+    st.session_state.happiness = 5
+    st.session_state.energy = 5
+    st.session_state.hunger = 5
+    st.session_state.mood = "רגוע"
+    st.success("🎉 המשחק התחיל מחדש!")
