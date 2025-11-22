@@ -1,48 +1,61 @@
 import streamlit as st
+import random
+import time
 
-st.set_page_config(page_title="מכין פיצה", page_icon="🍕")
+st.set_page_config(page_title="Pizza Rush", page_icon="🍕")
 
-st.title("🍕 מכין פיצה — גרסה מורחבת!")
-st.write("בחר את כל התוספות שאתה רוצה על הפיצה שלך:")
+st.title("🍕 Pizza Rush – משחק הכנת פיצות!")
 
-# תוספות אפשריות
-toppings = [
-    "גבינה נוספת",
-    "זיתים שחורים",
-    "זיתים ירוקים",
-    "פטריות",
-    "בצל",
-    "עגבניות",
-    "פלפל חריף",
-    "פלפל מתוק",
-    "אננס",
-    "נקניק",
-    "טונה",
-    "תירס",
-    "בולגרית",
-    "פפרוני",
-    "בייקון בקר",
-    "בזיליקום",
-    "חצילים",
-    "פטריות שמפיניון",
-    "עגבניות מיובשות",
-    "שמן זית",
-    "רוטב שום",
-    "רוטב פסטו"
+# רשימת תוספות
+all_toppings = [
+    "גבינה", "זיתים", "פטריות", "בצל", "עגבניות",
+    "פלפל חריף", "פלפל מתוק", "אננס", "נקניק",
+    "תירס", "טונה", "בולגרית"
 ]
 
+# יצירת הזמנה רנדומלית ללקוח
+def generate_order():
+    amount = random.randint(2, 5)
+    return random.sample(all_toppings, amount)
+
+# שמירה בסשן
+if "score" not in st.session_state:
+    st.session_state.score = 0
+if "order" not in st.session_state:
+    st.session_state.order = generate_order()
+
+st.subheader("👨‍🍳 הלקוח מבקש:")
+st.info(" | ".join(st.session_state.order))
+
 # בחירת תוספות
-selected_toppings = st.multiselect("בחר תוספות:", toppings)
+selected = st.multiselect("מה אתה שם בפיצה?", all_toppings)
 
-# כפתור להכנת הפיצה
-if st.button("אפה את הפיצה!"):
-    if selected_toppings:
-        st.success(f"🍕 פיצה מוכנה! עם: {', '.join(selected_toppings)} 🔥")
+# התחלת טיימר
+if "start_time" not in st.session_state:
+    st.session_state.start_time = time.time()
+
+time_left = 15 - int(time.time() - st.session_state.start_time)
+st.write(f"⏱️ זמן שנותר: **{max(time_left, 0)} שניות**")
+
+# בדיקה ולחיצה
+if st.button("מוכן!"):
+    if time_left <= 0:
+        st.error("⏰ נגמר הזמן! הלקוח כועס 😡")
     else:
-        st.warning("לא בחרת תוספות... מכין פיצה בסיסית 🍕")
+        if set(selected) == set(st.session_state.order):
+            st.success("🔥 בול מה שהלקוח רצה! +10 נקודות")
+            st.session_state.score += 10
+        else:
+            st.error("😡 טעית בתוספות! -5 נקודות")
+            st.session_state.score -= 5
 
-# תמונה
+    # הזמנה חדשה + אתחול זמן
+    st.session_state.order = generate_order()
+    st.session_state.start_time = time.time()
+
+st.write(f"💰 ניקוד: **{st.session_state.score}**")
+
 st.image(
     "https://upload.wikimedia.org/wikipedia/commons/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg",
-    width=300
+    width=250
 )
