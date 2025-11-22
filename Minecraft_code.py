@@ -10,8 +10,7 @@ name = st.text_input("מה שמך?")
 if name:
     st.subheader(f"ברוך הבא להופעה שלנו, {name}! מקווים שתהנה!")
     
-    # פתיחת הסרטון לפי הנתיב המלא
-    video_path = r"C:\Users\user\Downloads\SuperX.mp4"
-    video_file = open(video_path, "rb")
+    # פתיחת הסרטון מתוך התיקייה ביחס לקוד
+    video_file = open("SuperX.mp4", "rb")
     video_bytes = video_file.read()
     st.video(video_bytes)
