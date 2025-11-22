@@ -1,82 +1,90 @@
 import streamlit as st
-import random
-import time
 
 # ---------- הגדרות עמוד ----------
-st.set_page_config(page_title="👻 משחק אימה אוטומטי", page_icon="👻", layout="centered")
-st.title("👻 משחק אימה אוטומטי מאוד מפחיד")
-st.write("הישאר חי, נסה לא להיבהל! 😱")
+st.set_page_config(page_title="🦄 משחק חד־קרן חמוד", page_icon="🦄", layout="centered")
+st.title("🦄 טאמגוצ’י חד־קרן חמוד")
+st.write("טפל בחד־קרן שלך: האכל, שחק ותן לו לישון!")
 
 # ---------- מצב ראשוני ----------
-if "fear" not in st.session_state:
-    st.session_state.fear = 0
-if "health" not in st.session_state:
-    st.session_state.health = 100
-if "game_running" not in st.session_state:
-    st.session_state.game_running = True
+if "happiness" not in st.session_state:
+    st.session_state.happiness = 50
+if "energy" not in st.session_state:
+    st.session_state.energy = 50
+if "cleanliness" not in st.session_state:
+    st.session_state.cleanliness = 50
 
-placeholder = st.empty()
+# ---------- העלאת תמונה ----------
+uploaded_image = st.file_uploader("גרור ושחרר כאן תמונה של חד־קרן (PNG/JPG)", type=["png", "jpg", "jpeg"])
+
+if uploaded_image:
+    st.image(uploaded_image, width=250)
+else:
+    st.info("⬆️ גרור ושחרר תמונה כדי שהחד־קרן יופיע במשחק")
 
 # ---------- פונקציה לתיקון ערכים ----------
-def clamp(value, min_value=0, max_value=100):
-    return min(max(value, min_value), max_value)
+def clamp(value):
+    return min(max(value, 0), 100)
 
-# ---------- פונקציה לאירוע מפחיד ----------
-def scary_event():
-    event_type = random.choice(["רוח רפאים", "קול פתאומי", "צל מסתורי", "מפלצת פתאומית"])
-    fear_increase = random.randint(5, 20)
-    st.session_state.fear += fear_increase
-    st.session_state.fear = clamp(st.session_state.fear)
-    return f"💀 {event_type}! הפחד שלך עולה ב-{fear_increase}!"
+# ---------- פסי התקדמות ----------
+st.subheader("📊 מצב חד־הקרן:")
+st.write("**שמחה:**")
+st.progress(clamp(st.session_state.happiness)/100)
+st.write("**אנרגיה:**")
+st.progress(clamp(st.session_state.energy)/100)
+st.write("**ניקיון:**")
+st.progress(clamp(st.session_state.cleanliness)/100)
 
-# ---------- פונקציה לאירוע אוכל ----------
-def food_event():
-    health_gain = random.randint(5, 15)
-    st.session_state.health += health_gain
-    st.session_state.health = clamp(st.session_state.health)
-    return f"🍎 מצאת אוכל! הבריאות שלך עולה ב-{health_gain}!"
+st.divider()
 
-# ---------- לולאה אוטומטית ----------
-for i in range(50):  # 50 עדכונים, אפשר לשנות למספר גדול יותר
-    if not st.session_state.game_running:
-        break
+# ---------- כפתורי פעולה ----------
+col1, col2, col3 = st.columns(3)
 
-    message = "כל בסדר כרגע..."
+with col1:
+    if st.button("🍎 האכל"):
+        st.session_state.happiness += 10
+        st.session_state.energy += 15
+        st.session_state.cleanliness -= 5
+        st.success("התינוק אוכל בשמחה!")
 
-    # אירוע מפחיד 40% סיכוי
-    if random.random() < 0.4:
-        message = scary_event()
-        st.session_state.health -= random.randint(0, 15)
-        st.session_state.health = clamp(st.session_state.health)
+with col2:
+    if st.button("🛁 מקלחת"):
+        st.session_state.cleanliness += 20
+        st.session_state.happiness -= 5
+        st.info("התינוק מתקלח!")
 
-    # אירוע אוכל 20% סיכוי
-    elif random.random() < 0.2:
-        message = food_event()
+with col3:
+    if st.button("🎈 לשחק"):
+        st.session_state.happiness += 15
+        st.session_state.energy -= 10
+        st.success("התינוק משחק וצוחק!")
 
-    # עדכון המסך
-    with placeholder.container():
-        st.subheader("📊 מצבך:")
-        st.write(f"**פחד:** {st.session_state.fear}")
-        st.progress(clamp(st.session_state.fear)/100)
-        st.write(f"**בריאות:** {st.session_state.health}")
-        st.progress(clamp(st.session_state.health)/100)
-        st.write(f"{message}")
+if st.button("😴 לישון"):
+    st.session_state.energy += 25
+    st.session_state.happiness += 5
+    st.info("התינוק נרדם...")
 
-    # בדיקת מצב סיום
-    if st.session_state.health <= 0:
-        st.error("💀 אתה מת! המשחק נגמר…")
-        st.session_state.game_running = False
-        break
-    if st.session_state.fear >= 100:
-        st.error("😱 הפחד השתלט עליך! אתה בורח מהחדר… המשחק נגמר")
-        st.session_state.game_running = False
-        break
+# ---------- תיקון גבולות ----------
+st.session_state.happiness = clamp(st.session_state.happiness)
+st.session_state.energy = clamp(st.session_state.energy)
+st.session_state.cleanliness = clamp(st.session_state.cleanliness)
 
-    time.sleep(1)
+st.divider()
+
+# ---------- התראות ----------
+if st.session_state.happiness >= 100:
+    st.success("🎉 חד־הקרן מאושר מאוד!")
+elif st.session_state.happiness < 20:
+    st.warning("☹️ חד־הקרן עצוב… תעזור לו!")
+
+if st.session_state.energy < 20:
+    st.warning("😴 חד־הקרן עייף… כדאי לישון!")
+
+if st.session_state.cleanliness < 20:
+    st.warning("🧽 חד־הקרן מלוכלך!")
 
 # ---------- התחלה מחדש ----------
 if st.button("♻️ התחלת משחק חדש"):
-    st.session_state.fear = 0
-    st.session_state.health = 100
-    st.session_state.game_running = True
-    st.experimental_rerun()
+    st.session_state.happiness = 50
+    st.session_state.energy = 50
+    st.session_state.cleanliness = 50
+    st.success("🎉 המשחק התחיל מחדש!")
