@@ -3,87 +3,68 @@ import random
 import time
 
 # ---------- הגדרות עמוד ----------
-st.set_page_config(page_title="👻 משחק אימה", page_icon="👻", layout="centered")
-st.title("👻 משחק אימה מפחיד מאוד מאוד")
+st.set_page_config(page_title="👻 משחק אימה אוטומטי", page_icon="👻", layout="centered")
+st.title("👻 משחק אימה אוטומטי")
 st.write("הישאר חי, נסה לא להיבהל! 😱")
 
 # ---------- מצב ראשוני ----------
 if "fear" not in st.session_state:
-    st.session_state.fear = 0      # פחד
+    st.session_state.fear = 0
 if "health" not in st.session_state:
-    st.session_state.health = 100  # בריאות
+    st.session_state.health = 100
+if "game_running" not in st.session_state:
+    st.session_state.game_running = True
+
+placeholder = st.empty()
 
 # ---------- פונקציה לתיקון ערכים ----------
 def clamp(value, min_value=0, max_value=100):
     return min(max(value, min_value), max_value)
 
-# ---------- אירוע אקראי מפחיד ----------
+# ---------- פונקציה לאירוע אקראי ----------
 def scary_event():
     event_type = random.choice(["רוח רפאים", "קול פתאומי", "צל מסתורי", "מפלצת פתאומית"])
-    fear_increase = random.randint(10, 30)
+    fear_increase = random.randint(5, 20)
     st.session_state.fear += fear_increase
     st.session_state.fear = clamp(st.session_state.fear)
-    st.warning(f"💀 {event_type}! הפחד שלך עולה ב-{fear_increase}!")
+    return f"💀 {event_type}! הפחד שלך עולה ב-{fear_increase}!"
 
-# ---------- מדדים ----------
-st.subheader("📊 מצבך:")
-st.write("**פחד:**")
-st.progress(clamp(st.session_state.fear)/100)
-st.write("**בריאות:**")
-st.progress(clamp(st.session_state.health)/100)
+# ---------- לולאה אוטומטית ----------
+for i in range(30):  # 30 עדכונים, אפשר לשנות למספר גבוה יותר
+    if not st.session_state.game_running:
+        break
 
-st.divider()
-
-# ---------- כפתורי פעולה ----------
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    if st.button("🕯 הדלק נר"):
-        st.success("הנר מאיר את החדר, הפחד יורד מעט!")
-        st.session_state.fear -= 10
-        st.session_state.fear = clamp(st.session_state.fear)
-
-with col2:
-    if st.button("🏃‍♂️ לברוח"):
-        st.info("אתה מנסה לברוח…")
-        if random.random() < 0.5:
-            st.success("ברחת בהצלחה! הפחד קטן מעט")
-            st.session_state.fear -= 15
-        else:
-            st.error("לא הספקת לברוח! הבריאות יורדת")
-            st.session_state.health -= 20
-        st.session_state.fear = clamp(st.session_state.fear)
+    # אירוע אקראי
+    message = "כל בסדר כרגע..."
+    if random.random() < 0.4:
+        message = scary_event()
+        st.session_state.health -= random.randint(0, 15)
         st.session_state.health = clamp(st.session_state.health)
 
-with col3:
-    if st.button("🔎 לבדוק את החדר"):
-        st.info("אתה בודק את החדר…")
-        if random.random() < 0.6:
-            st.success("החדר רגוע…")
-        else:
-            scary_event()
+    # עדכון המסך
+    with placeholder.container():
+        st.subheader("📊 מצבך:")
+        st.write(f"**פחד:** {st.session_state.fear}")
+        st.progress(clamp(st.session_state.fear)/100)
+        st.write(f"**בריאות:** {st.session_state.health}")
+        st.progress(clamp(st.session_state.health)/100)
+        st.write(f"{message}")
 
-# ---------- אירוע אקראי קורה לעיתים ----------
-if random.random() < 0.3:
-    scary_event()
+    # בדיקת מצב סיום
+    if st.session_state.health <= 0:
+        st.error("💀 אתה מת! המשחק נגמר…")
+        st.session_state.game_running = False
+        break
+    if st.session_state.fear >= 100:
+        st.error("😱 הפחד השתלט עליך! אתה בורח מהחדר… המשחק נגמר")
+        st.session_state.game_running = False
+        break
 
-st.divider()
-
-# ---------- התראות סיום ----------
-if st.session_state.health <= 0:
-    st.error("💀 אתה מת! המשחק נגמר…")
-    if st.button("♻️ התחלה מחדש"):
-        st.session_state.fear = 0
-        st.session_state.health = 100
-
-elif st.session_state.fear >= 100:
-    st.error("😱 הפחד שלך השתלט עליך! אתה בורח מהחדר… המשחק נגמר")
-    if st.button("♻️ התחלה מחדש"):
-        st.session_state.fear = 0
-        st.session_state.health = 100
+    time.sleep(1)
 
 # ---------- התחלה מחדש ----------
 if st.button("♻️ התחלת משחק חדש"):
     st.session_state.fear = 0
     st.session_state.health = 100
-    st.success("🎉 המשחק התחיל מחדש!")
+    st.session_state.game_running = True
+    st.experimental_rerun()
