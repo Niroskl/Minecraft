@@ -4,7 +4,17 @@ import streamlit as st
 st.set_page_config(page_title="🦄 טיפול בחד־קרן תינוק", page_icon="🦄", layout="centered")
 
 st.title("🦄 טיפול בחד־קרן תינוק")
-st.write("גרור ושחרר כאן תמונה של חד־קרן תינוק (PNG/JPG):")
+st.write("⬇️ גרור ושחרר כאן תמונה של חד־קרן תינוק (PNG/JPG בלבד)")
+
+# ---------- CSS להסתיר כפתור בחירה ----------
+hide_file_uploader_style = """
+<style>
+div[data-baseweb="file-uploader"] > div:nth-child(2) {
+    display: none;
+}
+</style>
+"""
+st.markdown(hide_file_uploader_style, unsafe_allow_html=True)
 
 # ---------- מצב ראשוני ----------
 if "happiness" not in st.session_state:
@@ -15,13 +25,13 @@ if "cleanliness" not in st.session_state:
     st.session_state.cleanliness = 50
 
 # ---------- העלאת תמונה ----------
-uploaded_image = st.file_uploader("גרור ושחרר כאן", type=["png", "jpg", "jpeg"])
+uploaded_image = st.file_uploader("", type=["png", "jpg", "jpeg"])
 
 if uploaded_image:
     st.image(uploaded_image, width=320)
     st.success("🦄 התמונה נטענה בהצלחה!")
 else:
-    st.info("⬆️ גרור ושחרר תמונה כדי שהחד־קרן יופיע במשחק")
+    st.info("⬆️ גרור ושחרר תמונה בלבד כדי שהחד־קרן יופיע במשחק")
 
 st.subheader("מצב התינוק:")
 
