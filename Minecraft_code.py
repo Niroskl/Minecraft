@@ -4,7 +4,7 @@ import time
 
 # ---------- הגדרות עמוד ----------
 st.set_page_config(page_title="👻 משחק אימה אוטומטי", page_icon="👻", layout="centered")
-st.title("👻 משחק אימה אוטומטי")
+st.title("👻 משחק אימה אוטומטי מאוד מפחיד")
 st.write("הישאר חי, נסה לא להיבהל! 😱")
 
 # ---------- מצב ראשוני ----------
@@ -21,7 +21,7 @@ placeholder = st.empty()
 def clamp(value, min_value=0, max_value=100):
     return min(max(value, min_value), max_value)
 
-# ---------- פונקציה לאירוע אקראי ----------
+# ---------- פונקציה לאירוע מפחיד ----------
 def scary_event():
     event_type = random.choice(["רוח רפאים", "קול פתאומי", "צל מסתורי", "מפלצת פתאומית"])
     fear_increase = random.randint(5, 20)
@@ -29,17 +29,29 @@ def scary_event():
     st.session_state.fear = clamp(st.session_state.fear)
     return f"💀 {event_type}! הפחד שלך עולה ב-{fear_increase}!"
 
+# ---------- פונקציה לאירוע אוכל ----------
+def food_event():
+    health_gain = random.randint(5, 15)
+    st.session_state.health += health_gain
+    st.session_state.health = clamp(st.session_state.health)
+    return f"🍎 מצאת אוכל! הבריאות שלך עולה ב-{health_gain}!"
+
 # ---------- לולאה אוטומטית ----------
-for i in range(30):  # 30 עדכונים, אפשר לשנות למספר גבוה יותר
+for i in range(50):  # 50 עדכונים, אפשר לשנות למספר גדול יותר
     if not st.session_state.game_running:
         break
 
-    # אירוע אקראי
     message = "כל בסדר כרגע..."
+
+    # אירוע מפחיד 40% סיכוי
     if random.random() < 0.4:
         message = scary_event()
         st.session_state.health -= random.randint(0, 15)
         st.session_state.health = clamp(st.session_state.health)
+
+    # אירוע אוכל 20% סיכוי
+    elif random.random() < 0.2:
+        message = food_event()
 
     # עדכון המסך
     with placeholder.container():
